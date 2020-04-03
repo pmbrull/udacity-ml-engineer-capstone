@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SET THE TITLE
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tweet Sentiment Extraction}
+\author{Brull Borràs, Pere Miquel}
+   
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% --------------------
+\section{Domain Background}
+% --------------------
+
+Data is all around us, and with the introduction of Social Networks, the most straight forward to share this data is via text. This means that we need to find ways to interpret unstructured and free information such as \textbf{language}. When being introduced into \textbf{Natural Language Processing}, Sentiment Analysis is the go-to example one would try to tackle in the form of \textit{tweets}. The statement behind it revolves around inferring if a rather short message could be classified as positive, negative or neutral, based on the subjective information of the language: is the author using "\textit{good} or "\textit{bad}" words? Can we try to predict the emotional state of the author based on such small piece of information?
+
+What we are going to do, however, is look at this same problem from a different perspective. Given the sentiment of the author, can we actually know which words make a message being positive or negative?
+
+% --------------------
+\section{Problem Statement}
+% --------------------
+
+Our main objective is explore different NLP techniques that could aid us into finding which parts of the message transmit the \textit{sentiment} information and classify those into positive, negative or neutral. This study is based on the \href{https://www.kaggle.com/c/tweet-sentiment-extraction}{Kaggle's Tweet Sentiment Extraction} competition.
+
+% --------------------
+\section{Datasets and Inputs}
+% --------------------
+
+Data can be obtained in \href{https://www.kaggle.com/c/tweet-sentiment-extraction/data}{Kaggle}. We are going to use the \textit{train.csv} available, as we won't be covering the submission of the results to the platform.
+
+The train data is composed by 3535 rows with the following information:
+\begin{itemize}
+    \item textID - Unique identifier of the row
+    \item text - Complete tweet
+    \item selected text - The text that supports the tweet's sentiment. It is a subset of the \textit{text} feature containing one extract from a sentence. I.e., it does not contain independent words from different parts of the tweet.
+    \item sentiment - The generated sentiment of the text.
+\end{itemize}
+
+% --------------------
+\section{Solution Statement}
+% --------------------
+
+We will explore different NLP techniques based on extracting information, explain and apply them.
+
+For the data preprocessing, we will apply the usual tools as stemming, removing stopwords and splitting the free text into a clean and normalized list of words. After exploring the selected text as our target, we will discuss if we could remove punctuation marks or they are sometimes selected.
+
+Models might be trained separatedly: one for each of the possible sentiments.
+
+% --------------------
+\section{Benchmark Model}
+% --------------------
+
+Our benchmark model will be \href{https://en.wikipedia.org/wiki/Named-entity_recognition}{Named Entity Recognition}, as the simplest approach into extracting information from free text.
+With the same processed data, we will apply different models and compare their results against NER.
+
+% --------------------
+\section{Evaluation Metrics}
+% --------------------
+
+We will calculate our own Accuracy metric, based on the how many words we are extracting correctly for each row:
+
+\[ 
+\frac{\sum_{rows}\text{Accuracy for row i}}{\text{Total rows}},
+\]
+
+where
+
+\[ 
+\text{Accuracy for row i} = \frac{\text{Correctly identified words}}{\text{Words in selected text}}.
+\]
+
+% --------------------
+\section{Project Design}
+% --------------------
+
+We are going to follow the usual approach for Machine Learning tasks:
+
+\begin{itemize}
+    \item Preprocess data as discussed above: Remove stopwords, apply stemmers and convert free text into a list of clean and homogeneous words.
+    \item Split data into train and validation.
+    \item Apply models and compare their results
+\end{itemize}
+
+In the end, we will train and deploy the best obtained model using AWS Sagemaker.
+
+\end{document}
