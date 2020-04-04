@@ -65,17 +65,13 @@ With the same processed data, we will apply different models and compare their r
 \section{Evaluation Metrics}
 % --------------------
 
-We will calculate our own Accuracy metric, based on the how many words we are extracting correctly for each row:
+The Metric used will be the \href{https://en.wikipedia.org/wiki/Jaccard_index}{Jaccard index}:
 
-\[ 
-\frac{\sum_{rows}\text{Accuracy for row i}}{\text{Total rows}},
+\[
+J(A,B) = {{|A \cap B|}\over{|A \cup B|}} = {{|A \cap B|}\over{|A| + |B| - |A \cap B|}}
 \]
 
-where
-
-\[ 
-\text{Accuracy for row i} = \frac{\text{Correctly identified words}}{\text{Words in selected text}}.
-\]
+In our case, the sets are the two sentences which we are comparing after lemmatization, so that words such as \textit{friend} and \textit{friendly} are treated as equal.
 
 % --------------------
 \section{Project Design}
