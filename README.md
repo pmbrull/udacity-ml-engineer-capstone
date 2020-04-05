@@ -2,8 +2,10 @@
 
 Capstone Project for Udacity's Machine Learning Engineer Nanodegree.
 
-Find the proposal under the `proposal` directory.
+* Find the proposal under the `proposal` directory.
+* Find the report under the `report` directory.
+* Find a notebook with the executions under `notebooks`.
 
-Python environment: `vner`.
-References:
-* [Training NER](https://www.kaggle.com/rohitsingh9990/ner-training-using-spacy-0-628-lb)
+We have used a pretrained model. It can be downloaded from [here](https://www.kaggle.com/jonathanbesomi/transformers-pretrained-distilbert).
+
+Data has been uploaded in the `data` directory.
