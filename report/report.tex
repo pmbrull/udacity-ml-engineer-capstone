@@ -212,7 +212,7 @@ Selected Text Length Mean & 6.78 & 2.29 & 2.32 \\
 \hline
 \hline
 \end{tabular}
-\caption{Comparison of text and selected text mean lengths for each sentiment}
+\caption{Comparison of text and selected text mean lengths}
 \label{tab:text-lengths}
 \end{table}
 
@@ -232,11 +232,12 @@ For the data preprocessing, we will apply the usual tools such as
     \item \textbf{Lemmatization} - In order to treat as one the different derived forms from a single term. E.g., "friend", "friends" and "friendly" will all be treated as "friend". We are choosing lemmatization over stemming in order to end up with words that NLP techniques can extract meaning from. Note that if we were to use stemming techniques, words would be truncated to their \textit{root} or \textit{stem}, which is the part of the word that contains the global meaning, disregarding derived forms as gender and number. However, it is possible that we end up with words from which algorithms cannot interpret. Taking the word "studies" as an example, its lemma is "study", while the stem is just "studi".
     \item \textbf{Stopwords removal} - Which are terms that lack of their own meaning and are rather user to build up a sentence in a way that it's easier to share its message.
     \item \textbf{Normalize} - Convert all words to lower case.
+    \item \textbf{Cleaning} - We've detected selected texts that include some extra added single characters. During the cleaning phase, we will remove words with length 1. We are not afraid of losing any information based on that, as usual one letter words are "a" or "I", so in most cases everything will already be cleaned when removing stop words. Moreover, text just composed by symbols will be removed.
 \end{itemize}
 
-After cleaning the data, results will be cached in order to speed up future iterations. Then, we will split the train CSV data into our real train data and validation data as 80 / 20.
+After cleaning the data, results will be cached in order to speed up future iterations. Then, we will split the train CSV data into our real train data and validation data as 80 / 20. This gives us 12.933 rows for training and 3.234 for validation after removing the neutral sentiment.
 
-After fitting and comparing results over the validation set applying the Jaccard index, we will compare the different models.
+After fitting and comparing results over the validation set applying the Jaccard index, we will compare the performance for the different models.
 
 % --------------------
 \section{Benchmark Model}
@@ -245,13 +246,94 @@ After fitting and comparing results over the validation set applying the Jaccard
 Our starting point will be \textbf{Named Entity Recognition} as the simplest approach into extracting information from free text.
 With the same processed data, we will apply different models and compare their results against NER to see if we can obtain better results.
 
+As the words being used in positive and negative sentiments are really different, we will train a model for each of both sentiments. We will run 10 iterations of the \textbf{spaCy} Python's module to train the data for both positive and negative sentiments.
+
+The obtained results are the following:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+\hline
+ & Overall & Positive & Negative \\ \hline
+Score & 53'62\% & 56'34\% & 50'74\% \\ 
+\hline
+\hline
+\end{tabular}
+\caption{NER benchmark results}
+\label{tab:bench-results}
+\end{table}
+
+And while some of the predictions had full score, sometimes we are just missing by adding or removing words, such as
+
+\begin{verbatim}
+    selected_text: I'm thankful
+    vs.
+    selected_text_pred: thankful
+\end{verbatim}
+
+Which gives a 50\% score for that observation.
+
+While we are not obtaining astonishing results, it's not that bad for a benchmark. Also, these numbers went up almost 9 points after our preprocess, as training the model with the raw dataset gives a rough 44\% score. Therefore, we are confident when moving on that our preprocessing is going to be a useful tool.
+
+Finally, what it is really interesting about the NER approach, rather than its implementation, is the underlying logic behind the scenes. It can all be distilled down to letting the algorithm understand the grammatical meaning of a term in a sentence. Therefore, NER is able to identify nouns, verbs, adjectives, etc. These results are based on trying to understand two abstract layers on top of the free text that are nothing but human constructs:
+\begin{itemize}
+    \item The inherent meaning of a series of characters: a word.
+    \item The part this word plays when used together with others to create a sentence.
+\end{itemize}
+
+
 % --------------------
 \section{Aspiring Model}
 % --------------------
 
+For the aspiring model, we won't be using an out of the box solution such as \textbf{spaCy}'s NER. Moreover, we will be using a totally different logic, which is one of the most interesting aspects of NLP, there are multiple approaches able to solve the same problem.
+
+Again, we won't be focusing in the algorithm implementation, but rather have a brief discussion on the new logic that we are going to apply. Instead of treating this problem with pure linguistics - based on meaning and grammar of words - we will be using trying to answer a question: Given a \textbf{question}, the \textit{sentiment} of each tweet, and a \textbf{context}, the full tweet \textit{text} we want to obtain an \textbf{answer}: the \textit{selected text} label.
+
+% --------------------
+\subsection{Question Answering}
+% --------------------
+
+This approach tries to formalize how we extract information from text data based on finding the answer of a question which leads us to the problem target. The answer of the question is then present into the \textbf{context}, the text sample.
+
+The model that we are going to use is \textbf{DistilBERT}, a Neural Network that has already been fine-tuned on top of the \href{https://rajpurkar.github.io/SQuAD-explorer/}{Stanford Question Answering Dataset}. Only because of the usage of transfer learning, we can already expect to obtain better results than with NER.
+
+In order to make the training work here, we needed to apply a small extra preprocessing step. The model was failing when it was not able to find the answer by looking into the context. Checking at the raw data, this happened when the \textit{selected text} feature was not correctly informed. We removed 143 rows based on this.
+
+The model has been trained for 3 epochs with a learning rate of 5e-5. We have obtained the following results:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+\hline
+ & Overall & Positive & Negative \\ \hline
+Score & 59'29\% & 60'4\% & 58'12\% \\ 
+\hline
+\hline
+\end{tabular}
+\caption{Question-Answer results}
+\label{tab:bench-results}
+\end{table}
+
+Comparing these number against the benchmark mode, our assumption that using a pretrained model would allow for better scoring held. Also, we are again obtaining slightly better results for positive sentiments than for negative.
+
+Moreover, with Question-Answer we did not need to train separate models for each sentiment, but this might be because of the usage of a pretrained model.
+
 % --------------------
 \section{Conclusion}
 % --------------------
+
+We have explored two completely different techniques to solve the same problem: extract the subset of a text that contains the sentiment information about the author. In order to achieve this, we have preprocessed the text to normalize the data as much as possible without losing any valuable information.
+Moreover, thanks to the data exploration, we discussed how neutral sentiment did not give us any reason to apply any sophisticated method for inferring the target, as most of the text was already being considered as carrier of the sentiment information.
+Therefore, both models: NER and Question-Answer have been trained on top of the same cleaned data and validated on a separate partition, which allows us to compare performances.
+
+For the Question-Answer model, we have taken advantage of transfer learning to make it easier to obtain higher quality results. In the end, the aspirant model beat the benchmark placed by NER.
+
+The biggest challenge of the study has been exploring all the different NLP techniques that could be applied on top of our problem. Tackling them from an amateur background on NLP has not been easy, but the wide variety of possible options is what makes NLP most interesting. It is impressive how we can state really simple theoretical ideas that then get translated into algorithms.
+
+The most straight forward improvement in the study would be to deepen the knowledge on how the actual algorithms are built. After that, we would be in a well-suited position to fine tune the results. However, this aspect has been disregarded now as our prime objective was exploring different approaches.
 
 % --------------------
 \section{References}
@@ -261,6 +343,7 @@ With the same processed data, we will apply different models and compare their r
     \item Examples of model implementations have been extracted from the Kaggle's notebooks of the competition. We would like to highlight the following: \href{https://www.kaggle.com/rohitsingh9990/ner-inference-using-spacy-lb-0-628}{NER inference using Spacy}.
     \item \href{https://blog.bitext.com/what-is-the-difference-between-stemming-and-lemmatization/}{What is the difference between stemming and lemmatization}.
     \item \href{https://medium.com/@cristhianboujon/how-to-list-the-most-common-words-from-text-corpus-using-scikit-learn-dad4d0cab41d}{Get the most common words in a corpus}.
+    \item \href{https://www.kaggle.com/jonathanbesomi/question-answering-starter-pack}{Question-Answering Starter Pack}.
 \end{itemize}
 
 \end{document}
