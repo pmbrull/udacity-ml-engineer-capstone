@@ -2,6 +2,7 @@
 
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{graphicx}
 
 \usepackage{titling}
 \newcommand{\subtitle}[1]{%
@@ -10,6 +11,8 @@
     \begin{center}\large#1\end{center}
     \vskip0.5em}%
 }
+
+
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,7 +106,119 @@ In this section we are going to review the train data and try to answer the foll
     \item Are there any differences in the length of the selected texts for each sentiment?
 \end{itemize}
 
-TODO: visulization
+% --------------------
+\subsection{Data Balance}
+% --------------------
+
+The first question is easy to solve. After reading the data we just need to show the grouped counts:
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=12cm]{sentiment-distribution.png}
+\caption{Sentiment distribution in the dataset}
+\end{figure}
+
+
+Based on the graphic, everything seems balanced enough. Let's also add the real values:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|l|l}
+\hline
+\hline
+Neutral & Positive & Negative \\ \hline
+11.117 & 8.582 & 7.786 \\ 
+\hline
+\hline
+\end{tabular}
+\caption{Sentiment count in the complete dataset}
+\end{table}
+
+% --------------------
+\subsection{Most Common Words}
+% --------------------
+
+Checking the most common words is a great exercise to gain better understanding about the data we have at hand. For that, will first apply the preprocessing step to reduce variance and remove noise - meaningless words - and then extract the words that appear the most in the \textit{selected text} target.
+
+However, before jumping right into the target, let's visualize some information regarding the words that are being used in the text input:
+
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{positive_text_wc.png}
+\caption{Positive Text WordCloud}
+\end{figure}
+
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{negative_text_wc.png}
+\caption{Negative Text WordCloud}
+\end{figure}
+
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8cm]{neutral_text_wc.png}
+\caption{Neutral Text WordCloud}
+\end{figure}
+
+
+Thanks to these word clouds we can see some beautiful information, such as "love" and "mother" being used in the positive texts, while for the negative ones there are a lot of appearences of "sad", "miss" and "work".
+
+To see the real impact those have in the overall results, we should see the most common words in the target. You can see these results in figures \ref{fig:10pos}, \ref{fig:10neg} and \ref{fig:10neu}.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=10cm]{top_pos_words.png}
+\caption{Top 10 positive selected words}
+\label{fig:10pos}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=10cm]{top_neg_words.png}
+\caption{Top 10 negative selected words}
+\label{fig:10neg}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=10cm]{top_neu_words.png}
+\caption{Top 10 neutral selected words}
+\label{fig:10neu}
+\end{figure}
+
+What first catches the eye is not that the words that appear are actually the ones most hihglighted in the word clouds, but rather that for the neutral top words (\ref{fig:10neu}), the counts are almost the same for all of them. On the other hand, we see greater variance in the positive and negative charts.
+
+% --------------------
+\subsection{Selected Text Length}
+% --------------------
+
+Finally, we are going to compare the difference of the lengths between the \textit{text} feature and \textit{selected text} label.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c|c}
+\hline
+\hline
+ & Neutral & Positive & Negative \\ \hline
+Text Length Mean & 7.05 & 7.79 & 7.48 \\ 
+Selected Text Length Mean & 6.78 & 2.29 & 2.32 \\ 
+\hline
+\hline
+\end{tabular}
+\caption{Comparison of text and selected text mean lengths for each sentiment}
+\label{tab:text-lengths}
+\end{table}
+
+What the results in table \ref{tab:text-lengths} give us are quite interesting. First fo all we see a completely different behavior in positive and negative sentiments vs. neutral, where the mean lengths of both \textit{text} and \textit{selected text} are really close. This means that it is really hard to just select a small subsample of words that carry most of the information about the author's sentiment. However, for positive and negative sentiments it is possible to find key words, which most possibly will be the ones represented with most appearences in the word cloud, as we have already seen by checking the figures \ref{fig:10pos}, \ref{fig:10neg} and \ref{fig:10neu}.
+
+Therefore, as the purpose of this study is to being able to extract these key words, from now on we will disregards the \textbf{neutral} sentiment and focus on obtaining valuable insights for both positive and negative data.
 
 % --------------------
 \section{Solution Statement}
@@ -145,6 +260,7 @@ With the same processed data, we will apply different models and compare their r
 \begin{itemize}
     \item Examples of model implementations have been extracted from the Kaggle's notebooks of the competition. We would like to highlight the following: \href{https://www.kaggle.com/rohitsingh9990/ner-inference-using-spacy-lb-0-628}{NER inference using Spacy}.
     \item \href{https://blog.bitext.com/what-is-the-difference-between-stemming-and-lemmatization/}{What is the difference between stemming and lemmatization}.
+    \item \href{https://medium.com/@cristhianboujon/how-to-list-the-most-common-words-from-text-corpus-using-scikit-learn-dad4d0cab41d}{Get the most common words in a corpus}.
 \end{itemize}
 
 \end{document}
