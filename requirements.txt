@@ -57,7 +57,7 @@ pprint==0.1
 preshed==3.0.2
 prometheus-client==0.7.1
 prompt-toolkit==3.0.5
-protobuf==3.11.3
+protobuf==3.15.0
 ptyprocess==0.6.0
 Pygments==2.7.4
 pyparsing==2.4.6
